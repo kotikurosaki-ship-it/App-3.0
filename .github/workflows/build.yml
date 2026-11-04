@@ -23,9 +23,14 @@ jobs:
         with:
           channel: 'stable'
 
-      # This automatically generates the hidden android/ folder that Flutter needs
-      - name: Initialize Flutter Project
-        run: flutter create --org org.jobbot --project-name jobbot .
+      # THE FIX: Create the Android folders in a temp folder, then move them over
+      - name: Scaffold Android Project
+        run: |
+          flutter create --org org.jobbot --project-name jobbot temp_flutter
+          cp -r temp_flutter/android .
+          cp -r temp_flutter/ios .
+          cp temp_flutter/.metadata .
+          rm -rf temp_flutter
 
       - name: Get Dependencies
         run: flutter pub get
