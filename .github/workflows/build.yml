@@ -23,22 +23,28 @@ jobs:
         with:
           channel: 'stable'
 
-      # THE FIX: Backup your code, generate the Android folder, then restore your code
+      # THE FIX: Creates 'lib' if missing, moves files, and safely scaffolds Android
       - name: Scaffold Android Project Safely
         run: |
-          mkdir backup
-          cp -r lib backup/
-          cp pubspec.yaml backup/
+          mkdir -p backup
           
-          # This generates the android folder and .metadata file
+          # If lib exists, back it up. If not, create it and move loose dart files into it.
+          if [ -d "lib" ]; then
+            cp -r lib backup/
+          else
+            mkdir lib
+            mv *.dart lib/ 2>/dev/null || true
+            cp -r lib backup/
+          fi
+          
+          cp pubspec.yaml backup/ 2>/dev/null || true
+          
+          # Generate the Android folders
           flutter create --org org.jobbot --project-name jobbot .
           
-          # Delete the default counter app Flutter just created
-          rm -rf lib
-          
-          # Put YOUR code back
-          cp -r backup/lib .
-          cp backup/pubspec.yaml .
+          # Restore YOUR code over the default counter app
+          cp -r backup/lib/* lib/
+          cp backup/pubspec.yaml . 2>/dev/null || true
           rm -rf backup
 
       - name: Get Dependencies
