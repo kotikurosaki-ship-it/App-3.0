@@ -23,14 +23,23 @@ jobs:
         with:
           channel: 'stable'
 
-      # THE FIX: Create the Android folders in a temp folder, then move them over
-      - name: Scaffold Android Project
+      # THE FIX: Backup your code, generate the Android folder, then restore your code
+      - name: Scaffold Android Project Safely
         run: |
-          flutter create --org org.jobbot --project-name jobbot temp_flutter
-          cp -r temp_flutter/android .
-          cp -r temp_flutter/ios .
-          cp temp_flutter/.metadata .
-          rm -rf temp_flutter
+          mkdir backup
+          cp -r lib backup/
+          cp pubspec.yaml backup/
+          
+          # This generates the android folder and .metadata file
+          flutter create --org org.jobbot --project-name jobbot .
+          
+          # Delete the default counter app Flutter just created
+          rm -rf lib
+          
+          # Put YOUR code back
+          cp -r backup/lib .
+          cp backup/pubspec.yaml .
+          rm -rf backup
 
       - name: Get Dependencies
         run: flutter pub get
